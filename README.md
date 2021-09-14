@@ -6,5 +6,5 @@
 ![alt text](https://www.img.in.th/images/6216ca21bcce51ac60891ce631e37443.jpg)
 ตัวอย่าง เซ็นเซอร์วัดออกซิเจนในน้ำ
 ![alt text](https://www.img.in.th/images/f0056a76b6438cac24c4c3afd243f1a7.jpg)
-ตัวอย่าง
+ตัวอย่าง เซ็นเซอร์อุณหภูมิ
 ![alt text](https://www.img.in.th/images/06fd1f61ec707045ed459ba13afc77e4.jpg)
