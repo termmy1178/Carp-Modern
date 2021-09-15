@@ -10,5 +10,5 @@
 <h3>ตัวอย่าง เซ็นเซอร์วัดPH E-201-C</h><br/> 
 <img src="https://www.img.in.th/images/f0056a76b6438cac24c4c3afd243f1a7.jpg" alt="alternatetext" "style="width:500px;height:600px;">
 
-<h3>ตัวอย่าง เซ็นเซอร์อุณหภูมิ</h><br/> 
+<h3>ตัวอย่าง เซ็นเซอร์อุณหภูมิDS18B20</h><br/> 
 <img src="https://www.img.in.th/images/06fd1f61ec707045ed459ba13afc77e4.jpg" alt="alternatetext" "style="width:500px;height:600px;">
