@@ -10,7 +10,7 @@ Base.metadata.create_all(bind=engine)
 
 router = APIRouter(
     prefix="/Food",
-    tags=['Show Food'],
+    tags=['Food'],
     responses={404 : {
     'message': "Not found"
     }}
@@ -24,7 +24,7 @@ def get_db():
         db.close()
 
 @router.get('/food')
-async def food_survivalrate(db: Session = Depends(get_db)):
+async def show_survivalrate(db: Session = Depends(get_db)):
     return db.query(Food).all()
 
 @router.post('/food')
@@ -35,3 +35,19 @@ async def survivalrate(amountfishstart: int, amountfishend: int, db: Session = D
     db.commit()
     db.refresh(db_Food)
     return db_Food
+
+@router.post('/foodweight')
+async def food_weight(db: Session = Depends(get_db)):
+    return 
+
+@router.post('/Settime')
+async def Set_time(status: str, db: Session = Depends(get_db)):
+    db_timeset = Settime(status=status)
+    db.add(db_timeset)
+    db.commit()
+    db.refresh(db_timeset)
+    return db_timeset
+    
+
+
+

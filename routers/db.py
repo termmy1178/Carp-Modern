@@ -1,17 +1,19 @@
 from datetime import time
 from fastapi import FastAPI
-from sqlalchemy import create_engine, Column, Integer, Float, String, or_, update, and_
+from sqlalchemy import create_engine, Column, Integer, Float, or_, update, and_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import Session
 from sqlalchemy.sql import base
-from sqlalchemy.sql.sqltypes import INTEGER, TIMESTAMP
+from sqlalchemy.sql.expression import true
+from sqlalchemy.sql.sqltypes import INTEGER, TIME, TIMESTAMP, DateTime
+from sqlalchemy.types import String
 import pymysql
 
 app = FastAPI()
 
 engine = create_engine("mysql+pymysql://root:@127.0.0.1:3306/test2")
-# engine = create_engine("mysql://root:@127.0.0.1:3306/test2")
+
 Session = sessionmaker(bind = engine)
 session = Session()
 
@@ -48,10 +50,13 @@ class Food(Base):
     time = Column(TIMESTAMP)
     amountfishstart = Column(Integer)
     amountfishend = Column(Integer)
-    survivalrate = Column(Integer)
+    survivalrate = Column(Integer) 
 
-
-
+class Settime(Base):
+    __tablename__ = 'settime'
+    no = Column(Integer, primary_key=True, index=True)
+    time = Column(TIMESTAMP)
+    status = Column(String(100))
 
 # def Ph():
 #     Status = input('Status: ')

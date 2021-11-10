@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 Base.metadata.create_all(bind=engine)
 
 router = APIRouter(
-    prefix="/Sensor",
-    tags=['Show Sensor'],
+    prefix="/Show",
+    tags=['Show DB'],
     responses={404 : {
         'message': "Not found"
     }}
@@ -25,8 +25,8 @@ def get_db():
 
 ### PH ###
 @router.get('/PH')
-async def sensor_ph(db: Session = Depends(get_db)):
-    return db.query(PH).all()
+async def show_ph(db: Session = Depends(get_db)):
+    return db.query(PH).first()
 
 # @router.post('/PH')
 # async def create_ph(statusph: int, db: Session = Depends(get_db)):
@@ -38,8 +38,8 @@ async def sensor_ph(db: Session = Depends(get_db)):
 
 ### OX ###
 @router.get('/OX')
-async def sensor_ox(db: Session = Depends(get_db)):
-    return db.query(OX).all()
+async def show_ox(db: Session = Depends(get_db)):
+    return db.query(OX).first()
 
 # @router.post('/OX')
 # async def create_ox(statusox: int, db: Session = Depends(get_db)):
@@ -51,8 +51,8 @@ async def sensor_ox(db: Session = Depends(get_db)):
 
 ### TEMP ###
 @router.get('/Temp')
-async def sensor_temp(db: Session = Depends(get_db)):
-    return db.query(Temp).all()
+async def show_temp(db: Session = Depends(get_db)):
+    return db.query(Temp).first()
 
 # @router.post('/Temp')
 # async def create_Temp(statustemp: int, db: Session = Depends(get_db)):
@@ -61,3 +61,8 @@ async def sensor_temp(db: Session = Depends(get_db)):
 #     db.commit()
 #     db.refresh(db_temp)
 #     return db_temp
+
+@router.get('/OverView')
+async def over_view(db: Session = Depends(get_db)):
+    return
+
