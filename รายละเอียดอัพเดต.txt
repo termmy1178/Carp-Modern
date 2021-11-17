@@ -1,0 +1,22 @@
+ทำ slider
+*************************
+สี เหลือง เหลืองเข้ม ส้ม เข้ม แดง เข้ม
+สีดำก็สำคัญ
+ความชัดของลวดลาย
+*************************
+สายพัน ทำ Picker
+Showa Sanshoku
+Kohoku
+Taiaho Sanke
+Utsuri Mono
+Asagi Shusui
+Bekko
+Koromo
+Hikari Moyo
+Ogon
+Hikari Utsuri
+Tancho
+Kinginrin
+Kawari Mono
+
+**************************
