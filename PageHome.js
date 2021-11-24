@@ -84,15 +84,15 @@ const App = ({ navigation }) => {
   // }
 
   useEffect(() => {
-    // getph();
-    // getox();
-    // gettemp();
+    getph();
+    getox();
+    gettemp();
     const dataInterval = setInterval(() => {
       getph()
       gettemp()
       getox()
       getfood()
-    }, 1 * 1000);
+    }, 2 * 1000);
 
 
     return () => {

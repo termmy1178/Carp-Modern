@@ -1,10 +1,21 @@
 import React, { Component, useEffect } from 'react'
 import { Text, View, StyleSheet, Image, Switch, TouchableOpacity, Alert, } from 'react-native'
 import { BottomSheet, ThemeProvider, ListItem, Avatar } from 'react-native-elements';
+import ImagePicker from 'react-native-image-crop-picker';
+
 
 const App = ({ navigation }) => {
 
-
+    function goToPicker() {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 400,
+            cropping: true,
+        }).then(image => {
+            console.log('image console ==>', image);
+        })
+    }
+    
     const [isVisible, setIsVisible] = React.useState(false);
     const list = [
         {
@@ -99,12 +110,7 @@ const App = ({ navigation }) => {
                 <View style={{ width: 330, height: 150, backgroundColor: 'white', margin: 30, borderRadius: 30, top: 10, borderColor: 'back', borderWidth: 2 }}>
                     <View style={{ width: 140, height: 150 }}>
                         <View style={{ position: 'absolute', width: 130, height: 120, left: 15, borderRadius: 30, top: 10, borderColor: 'back', borderWidth: 2 }}>
-                            <TouchableOpacity onPress={() => navigation.navigate('Setfish')} style={{ width: 50, left: 23, top: 37,left:47 }}>
-                                <Image
-                                    style={{ width: 30, height: 40, left: 0 }}
-                                    source={{ uri: 'https://www.img.in.th/images/d719704197a874185ff76913fee3d2eb.png' }}
-                                />
-                            </TouchableOpacity>
+                            
                         </View>
                     </View>
                     <View style={{ width: 180, height: 75, bottom: 150, left: 140 }}>
@@ -132,12 +138,7 @@ const App = ({ navigation }) => {
                 <View style={{ width: 330, height: 150, backgroundColor: 'white', margin: 30, borderRadius: 30, top: -30, borderColor: 'back', borderWidth: 2 }}>
                     <View style={{ width: 140, height: 150 }}>
                         <View style={{ position: 'absolute', width: 130, height: 120, left: 15, borderRadius: 30, top: 10, borderColor: 'back', borderWidth: 2 }}>
-                            <TouchableOpacity onPress={() => navigation.navigate('Setfish')} style={{ width: 50, left: 23, top: 37,left:47 }}>
-                                <Image
-                                    style={{ width: 30, height: 40, left: 0 }}
-                                    source={{ uri: 'https://www.img.in.th/images/d719704197a874185ff76913fee3d2eb.png' }}
-                                />
-                            </TouchableOpacity>
+                            
                         </View>
                     </View>
                     <View style={{ width: 180, height: 75, bottom: 150, left: 140 }}>
@@ -165,12 +166,7 @@ const App = ({ navigation }) => {
                 <View style={{ width: 330, height: 150, backgroundColor: 'white', margin: 30, borderRadius: 30, top: -70, borderColor: 'back', borderWidth: 2 }}>
                     <View style={{ width: 140, height: 150 }}>
                         <View style={{ position: 'absolute', width: 130, height: 120, left: 15, borderRadius: 30, top: 10, borderColor: 'back', borderWidth: 2 }}>
-                            <TouchableOpacity onPress={() => navigation.navigate('Setfish')} style={{ width: 50, left: 23, top: 37,left:47 }}>
-                                <Image
-                                    style={{ width: 30, height: 40, left: 0 }}
-                                    source={{ uri: 'https://www.img.in.th/images/d719704197a874185ff76913fee3d2eb.png' }}
-                                />
-                            </TouchableOpacity>
+                            
                         </View>
                     </View>
                     <View style={{ width: 180, height: 75, bottom: 150, left: 140 }}>

@@ -68,6 +68,7 @@ const UselessTextInput = ({ navigation }) => {
           placeholder="Password"
           keyboardType='numeric'
           backgroundColor="white"
+          secureTextEntry={true}
         />
       </View>
 
@@ -75,6 +76,7 @@ const UselessTextInput = ({ navigation }) => {
         <Button style={styles.bt1}
           onPress={() => {
             getlogin()
+            // navigation.navigate('PageHome')
           }}
             // navigation.navigate('PageHome')
           

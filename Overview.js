@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, useState, useEffect } from 'react'
 import { Text, View, StyleSheet, Image, Switch, Button, TouchableOpacity, Alert } from 'react-native'
 import { BottomSheet, ThemeProvider, ListItem, Avatar } from 'react-native-elements';
 import { Dimensions } from "react-native";
@@ -10,12 +10,163 @@ import {
     ContributionGraph,
     StackedBarChart
 } from "react-native-chart-kit";
-import CircleSlider from "react-native-circle-slider";
+import MQTT from 'sp-react-native-mqtt';
 import { ScrollView } from 'react-native-gesture-handler';
 
 const App = ({ navigation }) => {
-    const [isEnabled, setIsEnabled] = React.useState(false);
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+    const [listDateTimeTemp, setListDateTimeTemp] = useState([0]);
+    const [datamqttTemp, setDataTemp] = useState([0]);
+
+    const [listDateTimeFood, setListDateTimeFood] = useState([0]);
+    const [datamqttFood, setDataFood] = useState([0]);
+
+    const [listDateTimeOx, setListDateTimeOx] = useState([0]);
+    const [datamqttOx, setDataOx] = useState([0]);
+
+    const [listDateTimepH, setListDateTimepH] = useState([0]);
+    const [datamqttpH, setDatapH] = useState([0]);
+
+    const [listDateTimeWeight, setListDateTimeWeight] = useState([0]);
+    const [datamqttWeight, setDataWeight] = useState([0]);
+
+    const [listDateTimeLength, setListDateTimeLength] = useState([0]);
+    const [datamqttLength, setDataLength] = useState([0]);
+
+    const insertDataToListTemp = (msg, date) => {
+        console.log('date: ' + date);
+        setDataTemp(datamqtt => [...datamqtt, msg]);
+        setListDateTimeTemp(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttTemp + '  date: ' + listDateTimeTemp)
+    };
+    const insertDataToListFood = (msg, date) => {
+        console.log('date: ' + date);
+        setDataFood(datamqtt => [...datamqtt, msg]);
+        setListDateTimeFood(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttFood + '  date: ' + listDateTimeFood)
+    };
+    const insertDataToListOx = (msg, date) => {
+        console.log('date: ' + date);
+        setDataOx(datamqtt => [...datamqtt, msg]);
+        setListDateTimeOx(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttOx + '  date: ' + listDateTimeOx)
+    };
+    const insertDataToListPH = (msg, date) => {
+        console.log('date: ' + date);
+        setDatapH(datamqtt => [...datamqtt, msg]);
+        setListDateTimepH(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttpH + '  date: ' + listDateTimepH)
+    };
+    const insertDataToListWeight = (msg, date) => {
+        console.log('date: ' + date);
+        setDataWeight(datamqtt => [...datamqtt, msg]);
+        setListDateTimeWeight(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttWeight + '  date: ' + listDateTimeWeight)
+    };
+    const insertDataToListLength = (msg, date) => {
+        console.log('date: ' + date);
+        setDataLength(datamqtt => [...datamqtt, msg]);
+        setListDateTimeLength(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttLength + '  date: ' + listDateTimeLength)
+    };
+
+    const currentTime = () => {
+        var date = new Date().getDate(); //Current Date
+        var month = new Date().getMonth() + 1; //Current Month
+        var year = new Date().getFullYear(); //Current Year
+        var hours = new Date().getHours(); //Current Hours
+        var min = new Date().getMinutes(); //Current Minutes
+        var sec = new Date().getSeconds(); //Current Seconds
+        return date + '/' + month + '/' + year + ' ' + hours + ':' + min + ':' + sec;
+    };
+
+    const pubsubmqtt = () => {
+        MQTT.createClient({
+            uri: 'mqtt://203.154.91.133:1883',
+            clientId: 'your_client_id'
+        }).then(function (client) {
+
+            client.on('closed', function () {
+                console.log('mqtt.event.closed');
+            });
+
+            client.on('error', function (msg) {
+                console.log('mqtt.event.error', msg);
+            });
+
+            client.on('message', function (msg) {
+                console.log('mqtt.event.message', msg);
+                console.log('msg.topic: ' + msg.topic)
+                if (msg.topic == "/dataWeight") {
+                    insertDataToListWeight(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/Weight', `{"Weight":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/datalength") {
+                    insertDataToListLength(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/Length', `{"Length":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/dataOx") {
+                    insertDataToListOx(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/oxe', `{"Ox":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/datapH") {
+                    insertDataToListPH(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/pH', `{"pH":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/dataFood") {
+                    insertDataToListFood(msg.data, currentTime());
+                    console.log('+++++++++'+msg.data + currentTime())
+                    console.log(datamqttFood)
+                    console.log(listDateTimeFood)
+                    client.publish('/Food', `{"Food":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/datatemp") {
+                    insertDataToListTemp(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/Temp', `{"Temp":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                  }
+            });
+
+            client.on('connect', function (msg) {
+                console.log('connected');
+                client.subscribe('/datalength', 0);
+                client.subscribe('/dataWeight', 0);
+                client.subscribe('/Length', 0);
+                client.subscribe('/Weight', 0);
+                client.subscribe('/dataOx', 0);
+                client.subscribe('/datapH', 0);
+                client.subscribe('/oxe', 0);
+                client.subscribe('/datatemp', 0);
+                client.subscribe('/Temp', 0);
+                client.subscribe('/dataFood', 0);
+                client.subscribe('/Food', 0);
+                // client.publish('/oxe', `{"Ox":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                // client.publish('/data', "test", 0, false);
+            });
+
+            client.connect();
+        }).catch(function (err) {
+            console.log(err);
+        });
+    }
+    useEffect(() => {
+        pubsubmqtt();
+        setInterval(() => {
+            currentTime();
+        }, 1000);
+
+        const dataInterval = setInterval(() => {
+        }, 1 * 1000);
+    
+    
+        return () => {
+          clearInterval(dataInterval)
+        };
+      });
 
     const [isVisible, setIsVisible] = React.useState(false);
     const list = [
@@ -82,13 +233,10 @@ const App = ({ navigation }) => {
         },
     ];
     const data = {
-        labels: ["06.00", "11.00", "16.00", "21.00",],
-        legend: ["L1", "L2", "L3"],
+        labels: listDateTimeFood,
         datasets: [
             {
-                data: [
-                    3.25, 4, 3.5, 3.7
-                ]
+                data: datamqttFood
             }
         ],
     }
@@ -128,158 +276,150 @@ const App = ({ navigation }) => {
 
             </View>
             <ScrollView>
-            <View style={{ top: 10, margin: 10 }}>
-                <LineChart
-                    data={{
-                        labels: ["06.00", "09.00", "13.00", "15.00", "18.00"],
-                        datasets: [
-                            {
-                                data: [
-                                    25, 26, 29, 31, 26
-                                ]
-                            }
-                        ]
-                    }}
-                    width={(Dimensions.get("window").width) - 20} // from react-native
-                    height={220}
-                    //yAxisLabel="$"
-                    yAxisSuffix=" cm"
-                    yAxisInterval={1} // optional, defaults to 1
-                    chartConfig={{
-                        backgroundGradientFrom: "#9999FF",
-                        backgroundGradientTo: "#9999FF",
-                        decimalPlaces: 1, // optional, defaults to 2dp
-                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                        style: {
-                            borderRadius: 16,
-
-                        },
-                        propsForDots: {
-                            r: "5",
-                            strokeWidth: "2",
-                            stroke: "white"
-                        }
-                    }}
-                    bezier
-                    style={{
-                        marginVertical: 8,
-                        borderRadius: 16
-                    }}
-                />
-                <Text style={{ fontSize: 25, left: 120, bottom: 0, fontWeight: 'bold' ,color:'#9999FF'}}>Temperature</Text>
-                <BarChart
-                    data={data}
-                    width={(Dimensions.get("window").width) - 20} // from react-native
-                    height={220}
-                    //yAxisLabel="$"
-                    yAxisSuffix="g"
-                    yAxisInterval={1} // optional, defaults to 1
-                    chartConfig={{
-
-                        backgroundGradientFrom: "#87CEEB",
-                        backgroundGradientTo: "#87CEEB",
-                        fillShadowGradient: `rgba(1, 122, 205, 1)`,
-                        fillShadowGradientOpacity: 1,
-                        decimalPlaces: 0, // optional, defaults to 2dp
-                        color: (opacity = 1) => `rgba(1, 122, 205, 1)`,
-                        decimalPlaces: 2, // optional, defaults to 2dp
-                        color: (opacity = 1) => `rgba(30, 144, 255, ${opacity})`,
-                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    }}
-                    bezier
-                    style={{
-                        marginVertical: 8,
-                        borderRadius: 16
-                    }}
-                />
-                <Text style={{ fontSize: 25, left: 160, bottom: 0, fontWeight: 'bold' ,color:'#87CEEB'}}>FOOD</Text>
-                <LineChart
-                    data={{
-                        labels: ["00.00", "03.00", "06.00", "09.00", "13.00", "15.00", "18.00"],
-                        datasets: [
-                            {
-                                data: [
-                                    5, 8, 6, 5, 7, 9, 8
-                                ]
-                            }
-                        ]
-                    }}
-                    width={(Dimensions.get("window").width) - 20} // from react-native
-                    height={220}
-                    //yAxisLabel="$"
-                    yAxisSuffix=" Ox"
-                    yAxisInterval={1} // optional, defaults to 1
-                    chartConfig={{
-                        backgroundGradientFrom: "#CC99CC",
-                        backgroundGradientTo: "#CC99CC",
-                        decimalPlaces: 2, // optional, defaults to 2dp
-                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                        style: {
-                            borderRadius: 16,
-
-                        },
-                        propsForDots: {
-                            r: "5",
-                            strokeWidth: "2",
-                            stroke: "#1E90FF"
-                        }
-                    }}
-                    bezier
-                    style={{
-                        marginVertical: 8,
-                        borderRadius: 16
-                    }}
-                />
-                <Text style={{ fontSize: 25, left: 150, bottom: 0, fontWeight: 'bold' ,color:'#CC99CC'}}>OXYGEN</Text>
-                <LineChart
-                    data={{
-                        labels: ["00.00", "03.00", "06.00", "09.00", "13.00", "15.00", "18.00"],
-                        datasets: [
-                            {
-                                data: [
-                                    5, 6, 8, 6, 7, 9, 7
-                                ]
-                            }
-                        ]
-                    }}
-                    width={(Dimensions.get("window").width) - 20} // from react-native
-                    height={220}
-                    //yAxisLabel="$"
-                    yAxisSuffix=" PH"
-                    yAxisInterval={1} // optional, defaults to 1
-                    chartConfig={{
-                        backgroundGradientFrom: "#33FFCC",
-                        backgroundGradientTo: "#33FFCC",
-                        decimalPlaces: 2, // optional, defaults to 2dp
-                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                        style: {
-                            borderRadius: 16,
-
-                        },
-                        propsForDots: {
-                            r: "5",
-                            strokeWidth: "2",
-                            stroke: "#000"
-                        }
-                    }}
-                    bezier
-                    style={{
-                        marginVertical: 8,
-                        borderRadius: 16
-                    }}
-                />
-                <Text style={{ fontSize: 25, left: 180, bottom: 0, fontWeight: 'bold' ,color:'#87CEEB'}}>PH</Text>
-                <LineChart
+                <View style={{ top: 10, margin: 10 }}>
+                    <LineChart
                         data={{
-                            labels: ["03.00", "03.30", "04.02", "04.30", "05.00", "08.07", "10.04"],
+                            labels: listDateTimeTemp,
                             datasets: [
                                 {
-                                    data: [
-                                        0.5, 0.9, 1.2, 1.8, 2.5, 2.8, 2.88
-                                    ],
+                                    data: datamqttTemp
+                                }
+                            ]
+                        }}
+                        width={(Dimensions.get("window").width) - 20} // from react-native
+                        height={220}
+                        //yAxisLabel="$"
+                        yAxisSuffix=" cm"
+                        yAxisInterval={1} // optional, defaults to 1
+                        chartConfig={{
+                            backgroundGradientFrom: "#9999FF",
+                            backgroundGradientTo: "#9999FF",
+                            decimalPlaces: 1, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            style: {
+                                borderRadius: 16,
+
+                            },
+                            propsForDots: {
+                                r: "5",
+                                strokeWidth: "2",
+                                stroke: "white"
+                            }
+                        }}
+                        bezier
+                        style={{
+                            marginVertical: 8,
+                            borderRadius: 16
+                        }}
+                    />
+                    <Text style={{ fontSize: 25, left: 120, bottom: 0, fontWeight: 'bold', color: '#9999FF' }}>Temperature</Text>
+                    <BarChart
+                        data={data}
+                        width={(Dimensions.get("window").width) - 20} // from react-native
+                        height={220}
+                        //yAxisLabel="$"
+                        yAxisSuffix="g"
+                        yAxisInterval={1} // optional, defaults to 1
+                        chartConfig={{
+
+                            backgroundGradientFrom: "#87CEEB",
+                            backgroundGradientTo: "#87CEEB",
+                            fillShadowGradient: `rgba(1, 122, 205, 1)`,
+                            fillShadowGradientOpacity: 1,
+                            decimalPlaces: 0, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(1, 122, 205, 1)`,
+                            decimalPlaces: 2, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(30, 144, 255, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                        }}
+                        bezier
+                        style={{
+                            marginVertical: 8,
+                            borderRadius: 16
+                        }}
+                    />
+                    <Text style={{ fontSize: 25, left: 160, bottom: 0, fontWeight: 'bold', color: '#87CEEB' }}>FOOD</Text>
+                    <LineChart
+                        data={{
+                            labels: listDateTimeOx,
+                            datasets: [
+                                {
+                                    data: datamqttOx
+                                }
+                            ]
+                        }}
+                        width={(Dimensions.get("window").width) - 20} // from react-native
+                        height={220}
+                        //yAxisLabel="$"
+                        yAxisSuffix=" Ox"
+                        yAxisInterval={1} // optional, defaults to 1
+                        chartConfig={{
+                            backgroundGradientFrom: "#CC99CC",
+                            backgroundGradientTo: "#CC99CC",
+                            decimalPlaces: 2, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            style: {
+                                borderRadius: 16,
+
+                            },
+                            propsForDots: {
+                                r: "5",
+                                strokeWidth: "2",
+                                stroke: "#1E90FF"
+                            }
+                        }}
+                        bezier
+                        style={{
+                            marginVertical: 8,
+                            borderRadius: 16
+                        }}
+                    />
+                    <Text style={{ fontSize: 25, left: 150, bottom: 0, fontWeight: 'bold', color: '#CC99CC' }}>OXYGEN</Text>
+                    <LineChart
+                        data={{
+                            labels: listDateTimepH,
+                            datasets: [
+                                {
+                                    data: datamqttpH
+                                }
+                            ]
+                        }}
+                        width={(Dimensions.get("window").width) - 20} // from react-native
+                        height={220}
+                        //yAxisLabel="$"
+                        yAxisSuffix=" PH"
+                        yAxisInterval={1} // optional, defaults to 1
+                        chartConfig={{
+                            backgroundGradientFrom: "#33FFCC",
+                            backgroundGradientTo: "#33FFCC",
+                            decimalPlaces: 2, // optional, defaults to 2dp
+                            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            style: {
+                                borderRadius: 16,
+
+                            },
+                            propsForDots: {
+                                r: "5",
+                                strokeWidth: "2",
+                                stroke: "#000"
+                            }
+                        }}
+                        bezier
+                        style={{
+                            marginVertical: 8,
+                            borderRadius: 16
+                        }}
+                    />
+                    <Text style={{ fontSize: 25, left: 180, bottom: 0, fontWeight: 'bold', color: '#87CEEB' }}>PH</Text>
+                    <LineChart
+                        data={{
+                            labels: listDateTimeWeight,
+                            datasets: [
+                                {
+                                    data: datamqttWeight
                                 }
                             ]
                         }}
@@ -310,18 +450,13 @@ const App = ({ navigation }) => {
                             borderRadius: 16
                         }}
                     />
-                    <Text style={{ fontSize: 25, left: 160, bottom: 0, fontWeight: 'bold' ,color:'#000'}}>Weight</Text>
+                    <Text style={{ fontSize: 25, left: 160, bottom: 0, fontWeight: 'bold', color: '#000' }}>Weight</Text>
                     <LineChart
                         data={{
-                            labels: ["03.00", "03.30", "04.02", "04.30", "05.00", "08.07", "10.04"],
+                            labels: listDateTimeLength,
                             datasets: [
                                 {
-                                    data: [
-                                        0.5, 0.9, 1.2, 1.8, 2.5, 2.8, 2.88
-                                    ],
-                                    data: [
-                                        40, 40.3, 42, 43, 46, 47, 48
-                                    ]
+                                    data: datamqttLength
                                 }
                             ]
                         }}
@@ -352,11 +487,11 @@ const App = ({ navigation }) => {
                             borderRadius: 16
                         }}
                     />
-                    <Text style={{ fontSize: 25, left: 160, bottom: 0, fontWeight: 'bold' ,color:'#9999FF'}}>Length</Text>
-            </View>
-            <View style={{ top: 30, margin: 10 }}>
+                    <Text style={{ fontSize: 25, left: 160, bottom: 0, fontWeight: 'bold', color: '#9999FF' }}>Length</Text>
+                </View>
+                <View style={{ top: 30, margin: 10 }}>
 
-            </View>
+                </View>
             </ScrollView>
         </View>
     );

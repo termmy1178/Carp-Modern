@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from 'react'
+import React, { Component, useEffect , useState} from 'react'
 import { Text, View, StyleSheet, Image, Switch, Button, TouchableOpacity, Alert, ScrollView, TextInput } from 'react-native'
 import { BottomSheet, ThemeProvider, ListItem, Avatar } from 'react-native-elements';
 import { Dimensions } from "react-native";
@@ -10,7 +10,7 @@ import {
     ContributionGraph,
     StackedBarChart
 } from "react-native-chart-kit";
-
+import MQTT from 'sp-react-native-mqtt';
 
 const App = ({ navigation }) => {
 
@@ -18,6 +18,85 @@ const App = ({ navigation }) => {
     const [Weight1, SetWeight1] = React.useState(0);
     const [Length, SetLength] = React.useState(0);
     const [Length1, SetLength1] = React.useState(0);
+
+    const [listDateTimeWeight, setListDateTimeWeight] = useState([0]);
+    const [datamqttWeight, setDataWeight] = useState([0]);
+    const [listDateTimeLength, setListDateTimeLength] = useState([0]);
+    const [datamqttLength, setDataLength] = useState([0]);
+
+    const insertDataToListWeight = (msg, date) => {
+        console.log('date: ' + date);
+        setDataWeight(datamqtt => [...datamqtt, msg]);
+        setListDateTimeWeight(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttWeight + '  date: ' + listDateTimeWeight)
+    };
+
+    const insertDataToListLength = (msg, date) => {
+        console.log('date: ' + date);
+        setDataLength(datamqtt => [...datamqtt, msg]);
+        setListDateTimeLength(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttLength + '  date: ' + listDateTimeLength)
+    };
+
+    const currentTime = () => {
+        var date = new Date().getDate(); //Current Date
+        var month = new Date().getMonth() + 1; //Current Month
+        var year = new Date().getFullYear(); //Current Year
+        var hours = new Date().getHours(); //Current Hours
+        var min = new Date().getMinutes(); //Current Minutes
+        var sec = new Date().getSeconds(); //Current Seconds
+        return date + '/' + month + '/' + year + ' ' + hours + ':' + min + ':' + sec;
+    };
+
+    const pubsubmqtt = () => {
+        MQTT.createClient({
+            uri: 'mqtt://203.154.91.133:1883',
+            clientId: 'your_client_id'
+        }).then(function (client) {
+
+            client.on('closed', function () {
+                console.log('mqtt.event.closed');
+            });
+
+            client.on('error', function (msg) {
+                console.log('mqtt.event.error', msg);
+            });
+
+            client.on('message', function (msg) {
+                console.log('mqtt.event.message', msg);
+                console.log('msg.topic: ' + msg.topic)
+                if (msg.topic == "/dataWeight") {
+                    insertDataToListWeight(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/Weight', `{"Weight":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/datalength") {
+                    insertDataToListLength(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/Length', `{"Length":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/dataTemp") {
+                    insertDataToListTemp(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/Temp', `{"Temp":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                  }
+            });
+
+            client.on('connect', function (msg) {
+                console.log('connected');
+                client.subscribe('/datalength', 0);
+                client.subscribe('/dataWeight', 0);
+                client.subscribe('/Length', 0);
+                client.subscribe('/Weight', 0);
+                // client.publish('/oxe', `{"Ox":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                // client.publish('/data', "test", 0, false);
+            });
+
+            client.connect();
+        }).catch(function (err) {
+            console.log(err);
+        });
+    }
 
     const getfish = () =>{
     var requestOptions = {
@@ -40,7 +119,7 @@ const App = ({ navigation }) => {
       fetch("http://203.154.91.133/Food/get_WeightLenght\n", requestOptions)
         .then(response => response.json())
         .then(result => {
-            console.log(result.weight)
+            console.log(result)
             SetWeight1(result.weight)
             console.log(result.lenght)
             SetLength1(result.lenght)
@@ -50,6 +129,10 @@ const App = ({ navigation }) => {
 
  
     useEffect(() => {
+        pubsubmqtt();
+        setInterval(() => {
+            currentTime();
+        }, 1000);
 
         const dataInterval = setInterval(() => {
             getw()
@@ -171,14 +254,14 @@ const App = ({ navigation }) => {
                         source={{ uri: 'https://www.img.in.th/images/fd686e101557a716470de9e06edf87f8.png' }}
 
                     />
-                    <Text style={{ fontSize: 25, left: 57, bottom: 35, fontWeight: 'bold' }}>{Weight1}</Text>
+                    <Text style={{ fontSize: 25, left: 37, bottom: 35, fontWeight: 'bold' }}>{Weight1} G</Text>
                 </View>
                 <View style={{ width: 190, height: 180, bottom: 190, left: 200 }}>
                     <Image
                         style={{ width: 170, height: 140, left: 0, top: 50 }}
                         source={{ uri: 'https://www.img.in.th/images/b98c1b8e74c344e5d8efb8c4c55c57ef.png' }}
                     />
-                    <Text style={{ fontSize: 25, left: 65, bottom: 35, fontWeight: 'bold' }}>{Length1}</Text>
+                    <Text style={{ fontSize: 25, left: 55, bottom: 35, fontWeight: 'bold' }}>{Length1} Cm</Text>
                 </View>
                 <View>
                     <Text style={{ fontSize: 25, left: 60, bottom: 170, fontWeight: 'bold' }}>Weight</Text>
@@ -231,12 +314,10 @@ const App = ({ navigation }) => {
 
                     <LineChart
                         data={{
-                            labels: ["03.00", "03.30", "04.02", "04.30", "05.00", "08.07", "10.04"],
+                            labels:listDateTimeWeight,
                             datasets: [
                                 {
-                                    data: [
-                                        0.5, 0.9, 1.2, 1.8, 2.5, 2.8, 2.88
-                                    ],
+                                    data: datamqttWeight
                                 }
                             ]
                         }}
@@ -272,15 +353,10 @@ const App = ({ navigation }) => {
                 <View style={{ margin: 10, bottom: 300 }}>
                     <LineChart
                         data={{
-                            labels: ["03.00", "03.30", "04.02", "04.30", "05.00", "08.07", "10.04"],
+                            labels: listDateTimeLength,
                             datasets: [
                                 {
-                                    data: [
-                                        0.5, 0.9, 1.2, 1.8, 2.5, 2.8, 2.88
-                                    ],
-                                    data: [
-                                        40, 40.3, 42, 43, 46, 47, 48
-                                    ]
+                                    data: datamqttLength
                                 }
                             ]
                         }}

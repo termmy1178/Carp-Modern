@@ -4,17 +4,30 @@ import MQTT from 'sp-react-native-mqtt';
 
 const App = ({ navigation }) => {
 
-  const [text, onChangeText] = React.useState("");
-  const [text1, fish] = React.useState("");
-  const [text2, weight] = React.useState("");
-  const [text3, PH] = React.useState("");
-  const [text4, Ox] = React.useState("");
+  // const [text, onChangeText] = React.useState("");
+  // const [text1, fish] = React.useState("");
+  // const [text2, weight] = React.useState("");
+  // const [text3, PH] = React.useState("");
+  // const [text4, Ox] = React.useState("");
 
   const [Time,Settime]=React.useState("");
   const [FishNumber,Setfish]=React.useState("");
   const [Fishweight,Setweight]=React.useState("");
-
   
+  const getcal = () =>{
+  var requestOptions = {
+    method: 'POST',
+    redirect: 'follow'
+  };
+  
+  fetch(`http://203.154.91.133/Food/Calculate?nbfish=${FishNumber}&weightfish=${Fishweight}`, requestOptions)
+    .then(response => response.json())
+    .then(result => {
+      console.log(result),
+      navigation.navigate('PageHome')
+    })
+    .catch(error => console.log('error', error));
+}
 
 
   const [Sw1, setIsEnabled] = React.useState(false);
@@ -72,9 +85,9 @@ const App = ({ navigation }) => {
         </View>
         <View style={{ flexDirection: 'row', position: 'absolute', top: 25, height: 55, width: 100, left: 300 }}>
           <TouchableOpacity onPress={() => {
-            console.log(Time,FishNumber,Fishweight)
-            pubsubmqtt(Time,FishNumber,Fishweight)
-            navigation.navigate('PageHome')}} style={{ position: 'absolute',}} >
+            console.log(Time)
+            pubsubmqtt(Time)
+            getcal()}} style={{ position: 'absolute',}} >
             <View>
               <Text style={{ fontSize: 25, left: 10, top: 10, fontWeight: "bold", }}>Save</Text>
             </View>

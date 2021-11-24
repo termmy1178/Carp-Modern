@@ -17,7 +17,7 @@ const App = ({ navigation }) => {
         .then(function (response) {
             return response.json()
           })
-        .then(result => {navigation.navigate('PageHome'),console.log(result)})
+        .then(result => {navigation.navigate('Page1'),console.log(result)})
         .catch(error => console.log('error', error));
     }
 

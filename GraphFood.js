@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import { Text, View, StyleSheet, Image, Switch, Button, TouchableOpacity, Alert } from 'react-native'
 import { BottomSheet, ThemeProvider, ListItem, Avatar } from 'react-native-elements';
 import { Dimensions } from "react-native";
@@ -6,11 +6,66 @@ import {
     LineChart,
     BarChart,
 } from "react-native-chart-kit";
-import CircleSlider from "react-native-circle-slider";
+import MQTT from 'sp-react-native-mqtt';
 
 const App = ({ navigation }) => {
 
     const [Foodweight, setFood] = React.useState(0);
+    const [listDateTimeFood, setListDateTimeFood] = useState([0]);
+    const [datamqttFood, setDataFood] = useState([0]);
+
+    const insertDataToListFood = (msg, date) => {
+        console.log('date: ' + date);
+        setDataFood(datamqtt => [...datamqtt, msg]);
+        setListDateTimeFood(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqttFood + '  date: ' + listDateTimeFood)
+    };
+
+    const currentTime = () => {
+        var date = new Date().getDate(); //Current Date
+        var month = new Date().getMonth() + 1; //Current Month
+        var year = new Date().getFullYear(); //Current Year
+        var hours = new Date().getHours(); //Current Hours
+        var min = new Date().getMinutes(); //Current Minutes
+        var sec = new Date().getSeconds(); //Current Seconds
+        return date + '/' + month + '/' + year + ' ' + hours + ':' + min + ':' + sec;
+    };
+
+    const pubsubmqtt = () => {
+        MQTT.createClient({
+            uri: 'mqtt://203.154.91.133:1883',
+            clientId: 'your_client_id'
+        }).then(function (client) {
+
+            client.on('closed', function () {
+                console.log('mqtt.event.closed');
+            });
+
+            client.on('error', function (msg) {
+                console.log('mqtt.event.error', msg);
+            });
+
+            client.on('message', function (msg) {
+                console.log('mqtt.event.message', msg);
+                console.log('msg.topic: ' + msg.topic)
+                if (msg.topic == "/dataFood") {
+                    insertDataToListFood(msg.data, currentTime());
+                    console.log('+++++++++'+msg.data + currentTime())
+                    console.log(datamqttFood)
+                    console.log(listDateTimeFood)
+                    client.publish('/Food', `{"Food":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+            });
+            client.on('connect', function (msg) {
+                console.log('connected');
+                client.subscribe('/dataFood', 0);
+                client.subscribe('/Food', 0);
+            });
+            client.connect();
+        }).catch(function (err) {
+            console.log(err);
+        });
+    }
 
     const getfood = () => {
         var requestOptions = {
@@ -28,6 +83,10 @@ const App = ({ navigation }) => {
     }
 
     useEffect(() => {
+        pubsubmqtt();
+        setInterval(() => {
+            currentTime();
+        }, 1000);
         const dataInterval = setInterval(() => {
             getfood()
         }, 1 * 1000);
@@ -108,13 +167,12 @@ const App = ({ navigation }) => {
 
     const screenWidth = Dimensions.get("window").width;
     const data = {
-        labels: ["06.00", "11.00", "16.00", "21.00",],
-        legend: ["L1", "L2", "L3"],
+        labels: listDateTimeFood,
+        // labels: [0],
         datasets: [
             {
-                data: [
-                    3.25, 4, 3.5, 3.7
-                ]
+                data:  datamqttFood,
+                // data:  [0],
             }
         ],
     }
@@ -187,7 +245,7 @@ const App = ({ navigation }) => {
                     style={{ width: 170, height: 140, left: 100, top: 50 }}
                     source={{ uri: 'https://www.img.in.th/images/b98c1b8e74c344e5d8efb8c4c55c57ef.png' }}
                 />
-                <Text style={{ fontSize: 25, left: 160, bottom: 35, fontWeight: 'bold' }}>{Foodweight}</Text>
+                <Text style={{ fontSize: 25, left: 150, bottom: 35, fontWeight: 'bold' }}>{Foodweight} G</Text>
 
             </View>
             <View>

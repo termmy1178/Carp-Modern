@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import { Text, View, StyleSheet, Image, Switch, Button, TouchableOpacity, Alert, ScrollView } from 'react-native'
 import { BottomSheet, ThemeProvider, ListItem, Avatar } from 'react-native-elements';
 import { Dimensions } from "react-native";
@@ -10,11 +10,113 @@ import {
     ContributionGraph,
     StackedBarChart
 } from "react-native-chart-kit";
+import MQTT from 'sp-react-native-mqtt';
 
 const App = ({ navigation }) => {
 
     const [Ox, setox] = React.useState(0);
     const [PH, setph] = React.useState(0);
+    const [Gox, graphox] = React.useState(0);
+    // const [Gtox, graphtimeox] = React.useState(0);
+    const [listDateTime, setListDateTime] = useState([0]);
+    const [datamqtt, setData] = useState([0]);
+    const [listDateTimepH, setListDateTimepH] = useState([0]);
+    const [datamqttpH, setDatapH] = useState([0]);
+
+    const insertDataToList = (msg, date) => {
+        console.log('date: ' + date);
+        setData(datamqtt => [...datamqtt, msg]);
+        setListDateTime(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqtt + '  date: ' + listDateTime)
+    };
+
+    const insertDataToListPH = (msg, date) => {
+        console.log('date: ' + date);
+        setDatapH(datamqtt => [...datamqtt, msg]);
+        setListDateTimepH(listDateTime => [...listDateTime, date]);
+        console.log('datamqtt: ' + datamqtt + '  date: ' + listDateTime)
+    };
+
+
+
+    const currentTime = () => {
+        var date = new Date().getDate(); //Current Date
+        var month = new Date().getMonth() + 1; //Current Month
+        var year = new Date().getFullYear(); //Current Year
+        var hours = new Date().getHours(); //Current Hours
+        var min = new Date().getMinutes(); //Current Minutes
+        var sec = new Date().getSeconds(); //Current Seconds
+        return date + '/' + month + '/' + year + ' ' + hours + ':' + min + ':' + sec;
+    };
+    const pubsubmqtt = () => {
+        MQTT.createClient({
+            uri: 'mqtt://203.154.91.133:1883',
+            clientId: 'your_client_id'
+        }).then(function (client) {
+
+            client.on('closed', function () {
+                console.log('mqtt.event.closed');
+            });
+
+            client.on('error', function (msg) {
+                console.log('mqtt.event.error', msg);
+            });
+
+            client.on('message', function (msg) {
+                console.log('mqtt.event.message', msg);
+                console.log('msg.topic: ' + msg.topic)
+                if (msg.topic == "/dataOx") {
+                    insertDataToList(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/oxe', `{"Ox":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+                if (msg.topic == "/datapH") {
+                    insertDataToListPH(msg.data, currentTime());
+                    console.log(msg.data + currentTime())
+                    client.publish('/pH', `{"pH":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                }
+            });
+
+            client.on('connect', function (msg) {
+                console.log('connected');
+                client.subscribe('/dataOx', 0);
+                client.subscribe('/datapH', 0);
+                client.subscribe('/oxe', 0);
+                // client.publish('/oxe', `{"Ox":${msg.data},"datetime":${currentTime()}}`, 0, false);
+                // client.publish('/data', "test", 0, false);
+            });
+
+            client.connect();
+        }).catch(function (err) {
+            console.log(err);
+        });
+    }
+
+    // const getgraphox = () => {
+    //     var requestOptions = {
+    //         method: 'GET',
+    //         redirect: 'follow'
+    //     };
+
+    //     fetch("http://203.154.91.133/Show/OX_all", requestOptions)
+    //         .then(response => response.json())
+    //         .then(result => {
+    //             console.log(result[1].statusox)
+    //             graphox(result[1].statusox)
+    //             console.log(result[1].timeox)
+    //             graphtimeox(result[1].timeox)
+    // graphtimeox(Gtoxv =>[...Gtox,result] )
+
+    // insertDataToList(result.statusox,result.timeox);
+    // insertDataToList(result);
+    // setData(result);
+    // console.log("Fee"+datamqtt)
+    // setListDateTime(result=> [...listDateTime, date]);
+    // setListDateTime(listDateTime => [...listDateTime, date]);
+    //         })
+    //         .catch(error => console.log('error', error));
+    // }
+
 
     const getox = () => {
         var requestOptions = {
@@ -27,37 +129,57 @@ const App = ({ navigation }) => {
             .then(result => {
                 console.log(result.statusox)
                 setox(result.statusox)
+                // console.log(result.timeox)
+                // graphox(result.timeox)
+                // insertDataToList(result.statusox,result.timeox);
+                // insertDataToList(result.statusox, currentTime());
             })
             .catch(error => console.log('error', error));
     }
 
     const getph = () => {
         var requestOptions = {
-          method: 'GET',
-          redirect: 'follow'
+            method: 'GET',
+            redirect: 'follow'
         };
-    
-        fetch("http://203.154.91.133/Show/PH", requestOptions)
-          .then(response => response.json())
-          .then(result => {
-            console.log(result.statusph)
-            setph(result.statusph)
-          })
-          .catch(error => console.log('error', error));
-      }
-    
 
+        fetch("http://203.154.91.133/Show/PH", requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                console.log(result.statusph)
+                setph(result.statusph)
+            })
+            .catch(error => console.log('error', error));
+    }
+
+
+    // useEffect(() => {
+    //     // getox()
+    //     // getgraphox()
+    // });
     useEffect(() => {
+        pubsubmqtt();
+        setInterval(() => {
+            currentTime();
+        }, 1000);
         const dataInterval = setInterval(() => {
             getph()
             getox()
-        }, 1 * 1000);
+        }, 2 * 1000);
 
 
         return () => {
             clearInterval(dataInterval)
         };
     });
+    // useEffect(() => {
+    //     pubsubmqtt();
+    //     setInterval(() => {
+    //       currentTime();
+    //     }, 1000);
+    //   }, []);
+
+
 
     const [isEnabled, setIsEnabled] = React.useState(false);
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
@@ -166,54 +288,54 @@ const App = ({ navigation }) => {
             </View>
             <ScrollView>
                 <View style={{ top: 30, margin: 10 }}>
-                    <LineChart
-                        data={{
-                            labels: ["00.00", "03.00", "06.00", "09.00", "13.00", "15.00", "18.00"],
-                            datasets: [
-                                {
-                                    data: [
-                                        5, 8, 6, 5, 7, 9, 8
-                                    ]
-                                }
-                            ]
-                        }}
-                        width={(Dimensions.get("window").width) - 20} // from react-native
-                        height={220}
-                        //yAxisLabel="$"
-                        yAxisSuffix=" Ox"
-                        yAxisInterval={1} // optional, defaults to 1
-                        chartConfig={{
-                            backgroundGradientFrom: "#9999FF",
-                            backgroundGradientTo: "#9999FF",
-                            decimalPlaces: 2, // optional, defaults to 2dp
-                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                            style: {
-                                borderRadius: 16,
+                    <ScrollView horizontal={true}>
+                        <LineChart
+                            data={{
+                                labels: listDateTime,
+                                datasets: [
+                                    {
+                                        data: datamqtt,
+                                    }
+                                ]
+                            }}
+                            width={(Dimensions.get("window").width) - 20} // from react-native
+                            height={220}
+                            //yAxisLabel="$"
+                            yAxisSuffix=" Ox"
+                            verticalLabelRotation={5}
+                            yAxisInterval={1} // optional, defaults to 1
+                            chartConfig={{
+                                backgroundGradientFrom: "#9999FF",
+                                backgroundGradientTo: "#9999FF",
+                                decimalPlaces: 2, // optional, defaults to 2dp
+                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
 
-                            },
-                            propsForDots: {
-                                r: "5",
-                                strokeWidth: "2",
-                                stroke: "#1E90FF"
-                            }
-                        }}
-                        bezier
-                        style={{
-                            marginVertical: 8,
-                            borderRadius: 16
-                        }}
-                    />
+                                style: {
+                                    borderRadius: 16,
+
+                                },
+                                propsForDots: {
+                                    r: "5",
+                                    strokeWidth: "2",
+                                    stroke: "#1E90FF"
+                                }
+                            }}
+                            bezier
+                            style={{
+                                marginVertical: 8,
+                                borderRadius: 16
+                            }}
+                        />
+                    </ScrollView>
                 </View>
                 <View style={{ top: 30, margin: 10 }}>
                     <LineChart
                         data={{
-                            labels: ["00.00", "03.00", "06.00", "09.00", "13.00", "15.00", "18.00"],
+                            labels: listDateTimepH,
                             datasets: [
                                 {
-                                    data: [
-                                        5, 6, 8, 6, 7, 9, 7
-                                    ]
+                                    data: datamqttpH,
                                 }
                             ]
                         }}
