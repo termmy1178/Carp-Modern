@@ -1,0 +1,288 @@
+[
+    {
+        "id": "9a1851b47ee82aef",
+        "type": "tab",
+        "label": "temp testsuc",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "52ac13faa6cc4a0b",
+        "type": "mqtt in",
+        "z": "9a1851b47ee82aef",
+        "name": "",
+        "topic": "/datatemp",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "585dfa6d01a872de",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 300,
+        "y": 220,
+        "wires": [
+            [
+                "8d747ab10474fcdc",
+                "aded7a697da03df6",
+                "c436fb4dc87b4ac8",
+                "b84afb57248dc05c"
+            ]
+        ]
+    },
+    {
+        "id": "8d747ab10474fcdc",
+        "type": "function",
+        "z": "9a1851b47ee82aef",
+        "name": "",
+        "func": "// readCelsius = msg.payload.readCelsius\n// // readFahrenheit = msg.payload.readFahrenheit\n// msg.topic = \"INSERT INTO status(readCelsius) VALUES ('40')\";\n// return msg;\n\n// readCelsius= msg.payload.readCelsius\n// msg.topic = `INSERT INTO status (readCelsius) VALUES (${readCelsius})`;\n// return msg;\n\n\n\n// msg.thermocouple = msg.payload.replace('thermocouple').replace(\"'c\\n'\");\n// msg.topic = \"INSERT INTO statustemp(thermocouple) VALUES (\"+msg.thermocouple+\")\";\n// return msg;\n\n\n// thermocouple= msg.payload.thermocouple\n// msg.topic = `INSERT INTO statustemp (thermocouple) VALUES (\"+thermocouple+\")`;\n// return msg;\n\n// msg.statustemp = msg.payload.replace('statustemp').replace(\"'c\\n'\");\n// msg.topic = \"INSERT INTO sensortemp(statustemp) VALUES (\"+msg.statustemp+\")\";\n// return msg;\n\n\n//ขึ้นเดดบอร์ด\n// var data = msg.payload;\n// var statustemp = (data.statustemp);\n// msg.topic = `INSERT INTO  sensortemp (statustemp) VALUES ('${statustemp}')`;\n// return msg;\n\n\n\n// var data = msg.payload;\n// var QUANTITY = (data.FF_QUANTITY);\n// var user = (data.user);\n// msg.topic = `INSERT INTO  feeding_food(FF_QUANTITY, MEM_ID) VALUES ('${QUANTITY}', (SELECT MEM_ID FROM member WHERE User = '${user}'))`;\n// return msg;\n\nvar data = msg.payload;\nvar statustemp = (data.statustemp);\nmsg.statustemp = msg.payload.replace('statustemp').replace(\"'c\\n'\");\nmsg.topic = \"INSERT INTO sensortemp(statustemp) VALUES (\"+msg.statustemp+\")\";\nreturn msg;\n\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 260,
+        "wires": [
+            [
+                "44a53093107c938b"
+            ]
+        ]
+    },
+    {
+        "id": "44a53093107c938b",
+        "type": "mysql",
+        "z": "9a1851b47ee82aef",
+        "mydb": "6a6803c1455b6045",
+        "name": "",
+        "x": 605,
+        "y": 260,
+        "wires": [
+            [
+                "112eb0979f82d5e8"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "112eb0979f82d5e8",
+        "type": "debug",
+        "z": "9a1851b47ee82aef",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "4c990cf136563897",
+        "type": "inject",
+        "z": "9a1851b47ee82aef",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "28",
+        "payloadType": "num",
+        "x": 670,
+        "y": 120,
+        "wires": [
+            [
+                "52c8ee1d4add33c8",
+                "ace9aaf0b023d333"
+            ]
+        ]
+    },
+    {
+        "id": "52c8ee1d4add33c8",
+        "type": "mqtt out",
+        "z": "9a1851b47ee82aef",
+        "name": "/datatemp",
+        "topic": "/datatemp",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "585dfa6d01a872de",
+        "x": 820,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "ace9aaf0b023d333",
+        "type": "debug",
+        "z": "9a1851b47ee82aef",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "aded7a697da03df6",
+        "type": "debug",
+        "z": "9a1851b47ee82aef",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "c436fb4dc87b4ac8",
+        "type": "ui_gauge",
+        "z": "9a1851b47ee82aef",
+        "name": "temp",
+        "group": "06cab2d190d10eb5",
+        "order": 1,
+        "width": "5",
+        "height": "5",
+        "gtype": "gage",
+        "title": "temp",
+        "label": "C",
+        "format": "{{value}}",
+        "min": "20",
+        "max": "40",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "25",
+        "seg2": "32",
+        "className": "",
+        "x": 510,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "b84afb57248dc05c",
+        "type": "ui_chart",
+        "z": "9a1851b47ee82aef",
+        "name": "",
+        "group": "06cab2d190d10eb5",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "temp",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "20",
+        "ymax": "40",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#b1cbec",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 510,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "585dfa6d01a872de",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "203.154.91.133",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6a6803c1455b6045",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "test2",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "06cab2d190d10eb5",
+        "type": "ui_group",
+        "name": "group1",
+        "tab": "88722c684f1b50dd",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "88722c684f1b50dd",
+        "type": "ui_tab",
+        "name": "tap1",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]

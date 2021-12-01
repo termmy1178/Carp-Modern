@@ -1,0 +1,288 @@
+[
+    {
+        "id": "7ea6a0e7ddfd390e",
+        "type": "tab",
+        "label": "Ox",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "abdc39d48d41085b",
+        "type": "mqtt in",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "topic": "/dataOx",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "585dfa6d01a872de",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 250,
+        "y": 240,
+        "wires": [
+            [
+                "2da1079578003445",
+                "884cf1b487e7553b",
+                "f860c75cde7e1e70",
+                "36675eaa2345d3ea"
+            ]
+        ]
+    },
+    {
+        "id": "2da1079578003445",
+        "type": "function",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "func": "// readCelsius = msg.payload.readCelsius\n// // readFahrenheit = msg.payload.readFahrenheit\n// msg.topic = \"INSERT INTO status(readCelsius) VALUES ('40')\";\n// return msg;\n\n// readCelsius= msg.payload.readCelsius\n// msg.topic = `INSERT INTO status (readCelsius) VALUES (${readCelsius})`;\n// return msg;\n\n\n\n// msg.thermocouple = msg.payload.replace('thermocouple').replace(\"'c\\n'\");\n// msg.topic = \"INSERT INTO statustemp(thermocouple) VALUES (\"+msg.thermocouple+\")\";\n// return msg;\n\n\n// thermocouple= msg.payload.thermocouple\n// msg.topic = `INSERT INTO statustemp (thermocouple) VALUES (\"+thermocouple+\")`;\n// return msg;\n\nvar data = msg.payload;\nvar statusox = (data.statusox);\nmsg.statusox = msg.payload.replace('statusox').replace(\"'c\\n'\");\nmsg.topic = \"INSERT INTO sensorox(statusox) VALUES (\"+msg.statusox+\")\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 280,
+        "wires": [
+            [
+                "5b54272c94cd7860"
+            ]
+        ]
+    },
+    {
+        "id": "5b54272c94cd7860",
+        "type": "mysql",
+        "z": "7ea6a0e7ddfd390e",
+        "mydb": "6a6803c1455b6045",
+        "name": "",
+        "x": 555,
+        "y": 280,
+        "wires": [
+            [
+                "ecf3013bf8ce58b0"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "ecf3013bf8ce58b0",
+        "type": "debug",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "884cf1b487e7553b",
+        "type": "debug",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 450,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "0326a347e2ce3b35",
+        "type": "inject",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "9",
+        "payloadType": "str",
+        "x": 350,
+        "y": 420,
+        "wires": [
+            [
+                "593385d8a70f18ec",
+                "322b777b7adb0a40"
+            ]
+        ]
+    },
+    {
+        "id": "593385d8a70f18ec",
+        "type": "mqtt out",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "topic": "/dataOx",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "585dfa6d01a872de",
+        "x": 540,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "322b777b7adb0a40",
+        "type": "debug",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "f860c75cde7e1e70",
+        "type": "ui_gauge",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "ox",
+        "group": "d6b3985b5ad8afba",
+        "order": 2,
+        "width": "5",
+        "height": "5",
+        "gtype": "gage",
+        "title": "ox",
+        "label": "mg/l",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "15",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "5",
+        "seg2": "10",
+        "className": "",
+        "x": 430,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "36675eaa2345d3ea",
+        "type": "ui_chart",
+        "z": "7ea6a0e7ddfd390e",
+        "name": "",
+        "group": "d6b3985b5ad8afba",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "ox",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "15",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#fd8217",
+            "#2ca02c",
+            "#9ce28d",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 430,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "585dfa6d01a872de",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "203.154.91.133",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6a6803c1455b6045",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "test2",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "d6b3985b5ad8afba",
+        "type": "ui_group",
+        "name": "group3",
+        "tab": "88722c684f1b50dd",
+        "order": 4,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "88722c684f1b50dd",
+        "type": "ui_tab",
+        "name": "tap1",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]

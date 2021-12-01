@@ -1,0 +1,243 @@
+[
+    {
+        "id": "4a6a441643234634",
+        "type": "tab",
+        "label": "food",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "671c9ebbe1a5e279",
+        "type": "mqtt in",
+        "z": "4a6a441643234634",
+        "name": "",
+        "topic": "/dataFood",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "585dfa6d01a872de",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 180,
+        "wires": [
+            [
+                "2231eeeba619f2db",
+                "7686cfaa854b846b",
+                "c1be58cd95823dcd"
+            ]
+        ]
+    },
+    {
+        "id": "2231eeeba619f2db",
+        "type": "function",
+        "z": "4a6a441643234634",
+        "name": "",
+        "func": "// readCelsius = msg.payload.readCelsius\n// // readFahrenheit = msg.payload.readFahrenheit\n// msg.topic = \"INSERT INTO status(readCelsius) VALUES ('40')\";\n// return msg;\n\n// readCelsius= msg.payload.readCelsius\n// msg.topic = `INSERT INTO status (readCelsius) VALUES (${readCelsius})`;\n// return msg;\n\n\n\n// msg.thermocouple = msg.payload.replace('thermocouple').replace(\"'c\\n'\");\n// msg.topic = \"INSERT INTO statustemp(thermocouple) VALUES (\"+msg.thermocouple+\")\";\n// return msg;\n\n\n// thermocouple= msg.payload.thermocouple\n// msg.topic = `INSERT INTO statustemp (thermocouple) VALUES (\"+thermocouple+\")`;\n// return msg;\n\nvar data = msg.payload;\nvar weight = (data.weight);\nmsg.weight = msg.payload.replace('weight').replace(\"'c\\n'\");\nmsg.topic = \"INSERT INTO foodweight(weight) VALUES (\"+msg.weight+\")\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "a5d520e712201373"
+            ]
+        ]
+    },
+    {
+        "id": "a5d520e712201373",
+        "type": "mysql",
+        "z": "4a6a441643234634",
+        "mydb": "6a6803c1455b6045",
+        "name": "",
+        "x": 475,
+        "y": 220,
+        "wires": [
+            [
+                "0c092f1fa9baee2d"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "0c092f1fa9baee2d",
+        "type": "debug",
+        "z": "4a6a441643234634",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "7686cfaa854b846b",
+        "type": "debug",
+        "z": "4a6a441643234634",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "de829375c3ecabb9",
+        "type": "inject",
+        "z": "4a6a441643234634",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "36",
+        "payloadType": "str",
+        "x": 270,
+        "y": 360,
+        "wires": [
+            [
+                "3435956369f95086",
+                "c5d0e490be084b45"
+            ]
+        ]
+    },
+    {
+        "id": "3435956369f95086",
+        "type": "mqtt out",
+        "z": "4a6a441643234634",
+        "name": "",
+        "topic": "/dataFood",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "585dfa6d01a872de",
+        "x": 460,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "c5d0e490be084b45",
+        "type": "debug",
+        "z": "4a6a441643234634",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 470,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "c1be58cd95823dcd",
+        "type": "ui_gauge",
+        "z": "4a6a441643234634",
+        "name": "food",
+        "group": "8243cb8e2c2014a7",
+        "order": 2,
+        "width": "5",
+        "height": "5",
+        "gtype": "wave",
+        "title": "food",
+        "label": "g",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "1000",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "20",
+        "seg2": "60",
+        "className": "",
+        "x": 350,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "585dfa6d01a872de",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "203.154.91.133",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6a6803c1455b6045",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "test2",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "8243cb8e2c2014a7",
+        "type": "ui_group",
+        "name": "group4",
+        "tab": "88722c684f1b50dd",
+        "order": 6,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "88722c684f1b50dd",
+        "type": "ui_tab",
+        "name": "tap1",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
